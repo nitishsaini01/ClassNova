@@ -1,0 +1,16 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# macOS file (if ever used)
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional: VS Code workspace settings
+.vscode/
