@@ -1,0 +1,125 @@
+body{
+font-family: Arial;
+background:#f4f6f9;
+padding:40px;
+}
+
+h1{
+text-align:center;
+}
+
+.container{
+width:800px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+form input{
+padding:10px;
+margin:5px;
+}
+
+button{
+padding:10px 15px;
+background:#4CAF50;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+table, th, td{
+border:1px solid #ccc;
+}
+
+th, td{
+padding:10px;
+text-align:center;
+}
+
+.delete{
+background:red;
+color:white;
+padding:5px 10px;
+border:none;
+cursor:pointer;
+}
+
+body{
+font-family: Arial;
+margin:0;
+background:#f4f6f9;
+}
+
+.dashboard{
+display:flex;
+}
+
+.sidebar{
+width:220px;
+background:#1e293b;
+color:white;
+height:100vh;
+padding:20px;
+}
+
+.sidebar ul{
+list-style:none;
+padding:0;
+}
+
+.sidebar li{
+padding:10px 0;
+cursor:pointer;
+}
+
+.main{
+flex:1;
+padding:30px;
+}
+
+.stats{
+display:flex;
+gap:20px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+button{
+padding:6px 10px;
+cursor:pointer;
+}
+
+.delete{
+background:red;
+color:white;
+border:none;
+}
+
+#pagination{
+margin-top:20px;
+}
