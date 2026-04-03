@@ -3,6 +3,7 @@ console.log("JS Loaded");
 const form = document.getElementById("studentForm");
 const table = document.getElementById("studentTable");
 const searchInput = document.getElementById("search");
+const resetSearch = document.getElementById("resetSearch");
 const pagination = document.getElementById("pagination");
 const importBtn = document.getElementById("importBtn");
 const importFile = document.getElementById("importFile");
@@ -10,6 +11,7 @@ const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
 
 let students = [];
 let currentPage = 1;
+let currentSort = { key: null, order: "asc" };
 const rowsPerPage = 5;
 
 /* ------------------------ */
@@ -18,6 +20,7 @@ async function loadStudents(page = 1){
   currentPage = page;
   const res = await fetch(`/api/students?page=${page}&limit=${rowsPerPage}`);
   students = await res.json();
+  applySort();
   displayStudents(students);
   loadPagination();
   loadStats();
@@ -56,6 +59,43 @@ function displayStudents(data){
 }
 
 /* ------------------------ */
+/* SORTING */
+document.querySelectorAll("thead th[data-key]").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.key;
+    if(currentSort.key === key){
+      currentSort.order = currentSort.order === "asc" ? "desc" : "asc";
+    } else {
+      currentSort.key = key;
+      currentSort.order = "asc";
+    }
+    applySort();
+    displayStudents(students);
+    updateSortIcons();
+  });
+});
+
+function applySort(){
+  if(!currentSort.key) return;
+  students.sort((a,b)=>{
+    let valA = a[currentSort.key].toString().toLowerCase();
+    let valB = b[currentSort.key].toString().toLowerCase();
+    if(valA < valB) return currentSort.order === "asc" ? -1 : 1;
+    if(valA > valB) return currentSort.order === "asc" ? 1 : -1;
+    return 0;
+  });
+}
+
+function updateSortIcons(){
+  document.querySelectorAll("thead th").forEach(th=>{
+    th.classList.remove("sort-asc","sort-desc");
+    if(th.dataset.key === currentSort.key){
+      th.classList.add(currentSort.order === "asc" ? "sort-asc" : "sort-desc");
+    }
+  });
+}
+
+/* ------------------------ */
 /* PAGINATION */
 async function loadPagination(){
   const res = await fetch("/api/students/count");
@@ -63,17 +103,27 @@ async function loadPagination(){
   const pageCount = Math.ceil(data.total / rowsPerPage);
   pagination.innerHTML = "";
 
+  const firstBtn = document.createElement("button");
+  firstBtn.innerText = "<<";
+  firstBtn.onclick = () => loadStudents(1);
+  pagination.appendChild(firstBtn);
+
   for(let i = 1; i <= pageCount; i++){
     const btn = document.createElement("button");
     btn.innerText = i;
-    if(i === currentPage) btn.style.background = "#2ecc71";
+    if(i === currentPage) btn.classList.add("current");
     btn.onclick = () => loadStudents(i);
     pagination.appendChild(btn);
   }
+
+  const lastBtn = document.createElement("button");
+  lastBtn.innerText = ">>";
+  lastBtn.onclick = () => loadStudents(pageCount);
+  pagination.appendChild(lastBtn);
 }
 
 /* ------------------------ */
-/* ADD OR UPDATE STUDENT */
+/* ADD / UPDATE STUDENT */
 form.addEventListener("submit", async (e)=>{
   e.preventDefault();
   const id = document.getElementById("studentId").value;
@@ -119,8 +169,7 @@ function editStudent(id,name,roll,email,phone,course){
 /* ------------------------ */
 /* DELETE SINGLE STUDENT */
 async function deleteStudent(id){
-  const confirmDelete = confirm("Are you sure you want to delete this student?");
-  if(confirmDelete){
+  if(confirm("Are you sure you want to delete this student?")){
     await fetch(`/api/students/${id}`,{ method:"DELETE" });
     loadStudents(currentPage);
   }
@@ -132,54 +181,46 @@ deleteSelectedBtn.addEventListener("click", async () => {
   const selected = Array.from(document.querySelectorAll(".selectStudent"))
                         .filter(cb => cb.checked)
                         .map(cb => cb.dataset.id);
-
-  if(selected.length === 0){
-    alert("Please select at least one student to delete.");
-    return;
-  }
-
-  const confirmDelete = confirm(`Are you sure you want to delete ${selected.length} students?`);
-  if(!confirmDelete) return;
+  if(selected.length === 0){ alert("Select at least one student."); return; }
+  if(!confirm(`Delete ${selected.length} students?`)) return;
 
   await fetch("/api/students/bulk-delete", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids: selected })
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ids: selected})
   });
-
   loadStudents(currentPage);
 });
 
 /* ------------------------ */
 /* LIVE SEARCH */
-searchInput.addEventListener("input", ()=>{
+searchInput.addEventListener("input", ()=>filterStudents());
+resetSearch.addEventListener("click", ()=>{
+  searchInput.value = "";
+  filterStudents();
+});
+
+function filterStudents(){
   const keyword = searchInput.value.toLowerCase();
-  const filtered = students.filter(student => 
-    student.name.toLowerCase().includes(keyword) ||
-    student.roll.toLowerCase().includes(keyword) ||
-    student.email.toLowerCase().includes(keyword) ||
-    student.phone.toLowerCase().includes(keyword) ||
-    student.course.toLowerCase().includes(keyword)
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(keyword) ||
+    s.roll.toLowerCase().includes(keyword) ||
+    s.email.toLowerCase().includes(keyword) ||
+    s.phone.toLowerCase().includes(keyword) ||
+    s.course.toLowerCase().includes(keyword)
   );
   displayStudents(filtered);
-});
+}
 
 /* ------------------------ */
 /* IMPORT STUDENTS FROM EXCEL */
 importBtn.addEventListener("click", async ()=>{
-  if(importFile.files.length === 0){
-    alert("Please select an Excel file.");
-    return;
-  }
+  if(importFile.files.length === 0){ alert("Select an Excel file."); return; }
 
   const formData = new FormData();
   formData.append("file", importFile.files[0]);
 
-  const res = await fetch("/api/students/import", {
-    method: "POST",
-    body: formData
-  });
-
+  const res = await fetch("/api/students/import", { method:"POST", body: formData });
   const data = await res.json();
   alert(data.message);
   importFile.value = "";

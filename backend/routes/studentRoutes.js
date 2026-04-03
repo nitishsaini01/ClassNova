@@ -9,23 +9,45 @@ const fs = require("fs");
 const upload = multer({ dest: "uploads/" });
 
 /* ------------------------ */
-/* GET STUDENTS WITH PAGINATION */
+/* GET STUDENTS WITH PAGINATION, SEARCH, SORT */
 router.get("/students", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   const offset = (page - 1) * limit;
+  const search = req.query.search ? req.query.search.toLowerCase() : "";
+  const sortKey = req.query.sortKey || "id";
+  const sortOrder = req.query.sortOrder === "desc" ? "DESC" : "ASC";
 
-  const sql = "SELECT * FROM students ORDER BY id ASC LIMIT ? OFFSET ?";
-  db.query(sql, [limit, offset], (err, result) => {
+  let sql = "SELECT * FROM students";
+  let params = [];
+
+  if (search) {
+    sql += " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+  }
+
+  sql += ` ORDER BY ${sortKey} ${sortOrder} LIMIT ? OFFSET ?`;
+  params.push(limit, offset);
+
+  db.query(sql, params, (err, result) => {
     if (err) return res.status(500).json(err);
     res.json(result);
   });
 });
 
 /* ------------------------ */
-/* GET TOTAL STUDENTS COUNT */
+/* GET TOTAL STUDENTS COUNT (OPTIONAL SEARCH) */
 router.get("/students/count", (req, res) => {
-  db.query("SELECT COUNT(*) as total FROM students", (err, result) => {
+  const search = req.query.search ? req.query.search.toLowerCase() : "";
+  let sql = "SELECT COUNT(*) as total FROM students";
+  let params = [];
+
+  if (search) {
+    sql += " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+  }
+
+  db.query(sql, params, (err, result) => {
     if (err) return res.status(500).json(err);
     res.json(result[0]);
   });
