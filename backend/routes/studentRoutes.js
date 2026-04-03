@@ -5,12 +5,23 @@ const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const multer = require("multer");
 const fs = require("fs");
+const path = require("path");
+const auth = require("../middleware/authMiddleware");
 
-const upload = multer({ dest: "uploads/" });
+/* -------------------- MULTER SETUP -------------------- */
+const uploadImage = multer({
+  dest: "uploads/profile_pics/",
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) cb(new Error("Only images allowed"), false);
+    else cb(null, true);
+  },
+});
 
-/* ------------------------ */
-/* GET STUDENTS WITH PAGINATION, SEARCH, SORT */
-router.get("/students", (req, res) => {
+const uploadExcel = multer({ dest: "uploads/" });
+
+/* -------------------- GET STUDENTS -------------------- */
+router.get("/students", auth, (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   const offset = (page - 1) * limit;
@@ -22,7 +33,8 @@ router.get("/students", (req, res) => {
   let params = [];
 
   if (search) {
-    sql += " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
+    sql +=
+      " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
     params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
   }
 
@@ -31,19 +43,23 @@ router.get("/students", (req, res) => {
 
   db.query(sql, params, (err, result) => {
     if (err) return res.status(500).json(err);
+    result.forEach(r => {
+      if (!r.profile_pic) r.profile_pic = "uploads/default.png";
+      else r.profile_pic = r.profile_pic.replace(/\\/g, "/");
+    });
     res.json(result);
   });
 });
 
-/* ------------------------ */
-/* GET TOTAL STUDENTS COUNT (OPTIONAL SEARCH) */
-router.get("/students/count", (req, res) => {
+/* -------------------- GET TOTAL COUNT -------------------- */
+router.get("/students/count", auth, (req, res) => {
   const search = req.query.search ? req.query.search.toLowerCase() : "";
   let sql = "SELECT COUNT(*) as total FROM students";
   let params = [];
 
   if (search) {
-    sql += " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
+    sql +=
+      " WHERE LOWER(name) LIKE ? OR LOWER(roll) LIKE ? OR LOWER(email) LIKE ? OR LOWER(phone) LIKE ? OR LOWER(course) LIKE ?";
     params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
   }
 
@@ -53,67 +69,60 @@ router.get("/students/count", (req, res) => {
   });
 });
 
-/* ------------------------ */
-/* ADD STUDENT */
-router.post("/students", (req, res) => {
+/* -------------------- ADD STUDENT -------------------- */
+router.post("/students", auth, (req, res) => {
   const { name, roll, email, phone, course } = req.body;
   const sql = "INSERT INTO students (name, roll, email, phone, course) VALUES (?,?,?,?,?)";
   db.query(sql, [name, roll, email, phone, course], (err, result) => {
     if (err) return res.status(500).json(err);
-    res.json({ message: "Student added successfully" });
+    res.json({ message: "Student added successfully", id: result.insertId });
   });
 });
 
-/* ------------------------ */
-/* UPDATE STUDENT */
-router.put("/students/:id", (req, res) => {
+/* -------------------- UPDATE STUDENT -------------------- */
+router.put("/students/:id", auth, (req, res) => {
   const { id } = req.params;
   const { name, roll, email, phone, course } = req.body;
   const sql = "UPDATE students SET name=?, roll=?, email=?, phone=?, course=? WHERE id=?";
-  db.query(sql, [name, roll, email, phone, course, id], (err, result) => {
-    if(err) return res.status(500).json(err);
+  db.query(sql, [name, roll, email, phone, course, id], (err) => {
+    if (err) return res.status(500).json(err);
     res.json({ message: "Student updated" });
   });
 });
 
-/* ------------------------ */
-/* DELETE SINGLE STUDENT */
-router.delete("/students/:id", (req, res) => {
+/* -------------------- DELETE SINGLE STUDENT -------------------- */
+router.delete("/students/:id", auth, (req, res) => {
   const { id } = req.params;
-  db.query("DELETE FROM students WHERE id=?", [id], (err, result) => {
-    if(err) return res.status(500).json(err);
+  db.query("DELETE FROM students WHERE id=?", [id], (err) => {
+    if (err) return res.status(500).json(err);
     res.json({ message: "Student deleted" });
   });
 });
 
-/* ------------------------ */
-/* BULK DELETE */
-router.post("/students/bulk-delete", (req, res) => {
+/* -------------------- BULK DELETE -------------------- */
+router.post("/students/bulk-delete", auth, (req, res) => {
   const { ids } = req.body;
-  if(!ids || !Array.isArray(ids) || ids.length === 0){
-    return res.status(400).json({ message: "No student IDs provided" });
-  }
+  if (!ids || !Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "No student IDs provided" });
+
   const placeholders = ids.map(() => "?").join(",");
   const sql = `DELETE FROM students WHERE id IN (${placeholders})`;
   db.query(sql, ids, (err, result) => {
-    if(err) return res.status(500).json(err);
+    if (err) return res.status(500).json(err);
     res.json({ message: `${result.affectedRows} students deleted` });
   });
 });
 
-/* ------------------------ */
-/* DASHBOARD STATS */
-router.get("/stats", (req, res) => {
+/* -------------------- DASHBOARD STATS -------------------- */
+router.get("/stats", auth, (req, res) => {
   db.query("SELECT COUNT(*) as total FROM students", (err, result) => {
-    if(err) return res.status(500).json(err);
+    if (err) return res.status(500).json(err);
     res.json({ students: result[0].total });
   });
 });
 
-/* ------------------------ */
-/* IMPORT FROM EXCEL */
-router.post("/students/import", upload.single("file"), async (req, res) => {
-  if(!req.file) return res.status(400).json({ message: "No file uploaded" });
+/* -------------------- IMPORT EXCEL -------------------- */
+router.post("/students/import", auth, uploadExcel.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(req.file.path);
@@ -121,29 +130,28 @@ router.post("/students/import", upload.single("file"), async (req, res) => {
 
   const studentsToInsert = [];
   worksheet.eachRow((row, rowNumber) => {
-    if(rowNumber === 1) return; // skip header
+    if (rowNumber === 1) return; // skip header
     const [name, roll, email, phone, course] = row.values.slice(1);
     studentsToInsert.push([name, roll, email, phone, course]);
   });
 
-  if(studentsToInsert.length === 0){
+  if (studentsToInsert.length === 0) {
     fs.unlinkSync(req.file.path);
-    return res.status(400).json({ message: "No student data found in file" });
+    return res.status(400).json({ message: "No student data found" });
   }
 
   const sql = "INSERT INTO students (name, roll, email, phone, course) VALUES ?";
-  db.query(sql, [studentsToInsert], (err, result) => {
+  db.query(sql, [studentsToInsert], (err) => {
     fs.unlinkSync(req.file.path);
-    if(err) return res.status(500).json(err);
+    if (err) return res.status(500).json(err);
     res.json({ message: "Students imported successfully" });
   });
 });
 
-/* ------------------------ */
-/* EXPORT EXCEL */
-router.get("/students/export", (req, res) => {
+/* -------------------- EXPORT EXCEL -------------------- */
+router.get("/students/export", auth, (req, res) => {
   db.query("SELECT * FROM students ORDER BY id ASC", async (err, results) => {
-    if(err) return res.status(500).json(err);
+    if (err) return res.status(500).json(err);
 
     const workbook = new ExcelJS.Workbook();
     const ws = workbook.addWorksheet("Students");
@@ -157,46 +165,43 @@ router.get("/students/export", (req, res) => {
     ];
     results.forEach(r => ws.addRow(r));
 
-    res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition","attachment; filename=students.xlsx");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", "attachment; filename=students.xlsx");
 
     await workbook.xlsx.write(res);
     res.end();
   });
 });
 
-/* ------------------------ */
-/* EXPORT PDF */
-router.get("/students/export-pdf", (req, res) => {
+/* -------------------- EXPORT PDF -------------------- */
+router.get("/students/export-pdf", auth, (req, res) => {
   db.query("SELECT * FROM students ORDER BY id ASC", (err, results) => {
-    if(err) return res.status(500).json(err);
+    if (err) return res.status(500).json(err);
 
     const doc = new PDFDocument({ margin: 30, size: "A4" });
-    res.setHeader("Content-Type","application/pdf");
-    res.setHeader("Content-Disposition","attachment; filename=students.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=students.pdf");
     doc.pipe(res);
 
     doc.fontSize(18).text("Students List", { align: "center" });
     doc.moveDown();
-    doc.fontSize(12).text("ID",50,doc.y,{continued:true});
-    doc.text("Name",90,doc.y,{continued:true});
-    doc.text("Roll",230,doc.y,{continued:true});
-    doc.text("Email",290,doc.y,{continued:true});
-    doc.text("Phone",420,doc.y,{continued:true});
-    doc.text("Course",500,doc.y);
-    doc.moveDown();
-
-    results.forEach(s=>{
-      doc.text(s.id.toString(),50,doc.y,{continued:true});
-      doc.text(s.name,90,doc.y,{continued:true});
-      doc.text(s.roll,230,doc.y,{continued:true});
-      doc.text(s.email,290,doc.y,{continued:true});
-      doc.text(s.phone,420,doc.y,{continued:true});
-      doc.text(s.course,500,doc.y);
-      doc.moveDown();
+    results.forEach(s => {
+      doc.fontSize(12).text(`${s.id} | ${s.name} | ${s.roll} | ${s.email} | ${s.phone} | ${s.course}`);
     });
 
     doc.end();
+  });
+});
+
+/* -------------------- UPLOAD PROFILE PICTURE -------------------- */
+router.post("/students/:id/upload", auth, uploadImage.single("profile_pic"), (req, res) => {
+  const { id } = req.params;
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+  const newPath = req.file.path;
+  db.query("UPDATE students SET profile_pic=? WHERE id=?", [newPath, id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Profile picture uploaded", path: newPath.replace(/\\/g, "/") });
   });
 });
 
