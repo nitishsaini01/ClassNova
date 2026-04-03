@@ -4,11 +4,15 @@ const form = document.getElementById("studentForm");
 const table = document.getElementById("studentTable");
 const searchInput = document.getElementById("search");
 const pagination = document.getElementById("pagination");
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
 
 let students = [];
 let currentPage = 1;
 const rowsPerPage = 5;
 
+/* ------------------------ */
 /* LOAD STUDENTS */
 async function loadStudents(page = 1){
   currentPage = page;
@@ -16,8 +20,10 @@ async function loadStudents(page = 1){
   students = await res.json();
   displayStudents(students);
   loadPagination();
+  loadStats();
 }
 
+/* ------------------------ */
 /* DISPLAY STUDENTS */
 function displayStudents(data){
   table.innerHTML = "";
@@ -33,21 +39,23 @@ function displayStudents(data){
         <td>${student.course}</td>
         <td>
           <button onclick="editStudent(${student.id},'${student.name}','${student.roll}','${student.email}','${student.phone}','${student.course}')">Edit</button>
-          <button class="delete" onclick="deleteStudent(${student.id})">Delete</button>
+          <button onclick="deleteStudent(${student.id})">Delete</button>
         </td>
       </tr>
     `;
   });
 
-  // Select all checkbox logic
   const selectAll = document.getElementById("selectAll");
   const checkboxes = document.querySelectorAll(".selectStudent");
-  selectAll.checked = false;
-  selectAll.addEventListener("change", () => {
-    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-  });
+  if(selectAll){
+    selectAll.checked = false;
+    selectAll.addEventListener("change", () => {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    });
+  }
 }
 
+/* ------------------------ */
 /* PAGINATION */
 async function loadPagination(){
   const res = await fetch("/api/students/count");
@@ -64,6 +72,7 @@ async function loadPagination(){
   }
 }
 
+/* ------------------------ */
 /* ADD OR UPDATE STUDENT */
 form.addEventListener("submit", async (e)=>{
   e.preventDefault();
@@ -93,9 +102,9 @@ form.addEventListener("submit", async (e)=>{
   form.reset();
   document.getElementById("studentId").value = "";
   loadStudents(currentPage);
-  loadStats();
 });
 
+/* ------------------------ */
 /* EDIT STUDENT */
 function editStudent(id,name,roll,email,phone,course){
   document.getElementById("studentId").value = id;
@@ -107,18 +116,19 @@ function editStudent(id,name,roll,email,phone,course){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* DELETE STUDENT */
+/* ------------------------ */
+/* DELETE SINGLE STUDENT */
 async function deleteStudent(id){
   const confirmDelete = confirm("Are you sure you want to delete this student?");
   if(confirmDelete){
     await fetch(`/api/students/${id}`,{ method:"DELETE" });
     loadStudents(currentPage);
-    loadStats();
   }
 }
 
+/* ------------------------ */
 /* BULK DELETE */
-document.getElementById("deleteSelectedBtn").addEventListener("click", async () => {
+deleteSelectedBtn.addEventListener("click", async () => {
   const selected = Array.from(document.querySelectorAll(".selectStudent"))
                         .filter(cb => cb.checked)
                         .map(cb => cb.dataset.id);
@@ -138,9 +148,9 @@ document.getElementById("deleteSelectedBtn").addEventListener("click", async () 
   });
 
   loadStudents(currentPage);
-  loadStats();
 });
 
+/* ------------------------ */
 /* LIVE SEARCH */
 searchInput.addEventListener("input", ()=>{
   const keyword = searchInput.value.toLowerCase();
@@ -154,6 +164,29 @@ searchInput.addEventListener("input", ()=>{
   displayStudents(filtered);
 });
 
+/* ------------------------ */
+/* IMPORT STUDENTS FROM EXCEL */
+importBtn.addEventListener("click", async ()=>{
+  if(importFile.files.length === 0){
+    alert("Please select an Excel file.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", importFile.files[0]);
+
+  const res = await fetch("/api/students/import", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  importFile.value = "";
+  loadStudents(currentPage);
+});
+
+/* ------------------------ */
 /* LOAD STATS */
 async function loadStats(){
   const res = await fetch("/api/stats");
@@ -161,6 +194,6 @@ async function loadStats(){
   document.getElementById("totalStudents").innerText = data.students;
 }
 
+/* ------------------------ */
 /* INITIAL LOAD */
 loadStudents();
-loadStats();
