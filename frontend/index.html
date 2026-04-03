@@ -4,39 +4,52 @@
 <meta charset="UTF-8">
 <title>ClassNova ERP Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
+
 <style>
-  /* ------------------------
-     Table Styling
-  ------------------------ */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-  }
-  thead th {
-    position: sticky;
-    top: 0;
-    background: #2ecc71;
-    color: white;
-    cursor: pointer;
-  }
-  tbody tr:nth-child(even) { background: #f9f9f9; }
-  tbody tr:hover { background: #d1f0d1; }
-  th.sort-asc::after { content: " ▲"; }
-  th.sort-desc::after { content: " ▼"; }
-  /* Pagination Buttons */
-  #pagination button {
-    margin: 2px;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
-    background: #ecf0f1;
-  }
-  #pagination button.current { background: #2ecc71; color: white; }
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:left;
+}
+
+thead th{
+position:sticky;
+top:0;
+background:#2ecc71;
+color:white;
+cursor:pointer;
+}
+
+tbody tr:nth-child(even){background:#f9f9f9;}
+tbody tr:hover{background:#d1f0d1;}
+
+th.sort-asc::after{content:" ▲";}
+th.sort-desc::after{content:" ▼";}
+
+#pagination button{
+margin:2px;
+padding:5px 10px;
+border:none;
+cursor:pointer;
+background:#ecf0f1;
+}
+
+#pagination button.current{
+background:#2ecc71;
+color:white;
+}
+
+.profile-pic{
+width:50px;
+height:50px;
+border-radius:50%;
+object-fit:cover;
+}
 </style>
 </head>
 
@@ -44,96 +57,126 @@
 
 <div class="dashboard">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>ClassNova</h2>
-    <ul>
-      <li>Dashboard</li>
-      <li>Students</li>
-      <li>Courses</li>
-      <li>Teachers</li>
-      <li>Settings</li>
-      <li>Logout</li>
-    </ul>
-  </div>
+<div class="sidebar">
+<h2>ClassNova</h2>
+<ul>
+<li>Dashboard</li>
+<li>Students</li>
+<li>Courses</li>
+<li>Teachers</li>
+<li>Settings</li>
+<li>Logout</li>
+</ul>
+</div>
 
-  <!-- Main Content -->
-  <div class="main">
+<div class="main">
 
-    <h1>Student Management</h1>
+<h1>Student Management</h1>
 
-    <!-- Stats Cards -->
-    <div class="stats">
-      <div class="card">
-        <h3>Total Students</h3>
-        <p id="totalStudents">0</p>
-      </div>
-    </div>
+<div class="stats">
+<div class="card">
+<h3>Total Students</h3>
+<p id="totalStudents">0</p>
+</div>
+</div>
 
-    <h2>Add / Update Student</h2>
-    <form id="studentForm">
-      <input type="hidden" id="studentId">
-      <input type="text" id="name" placeholder="Student Name" required>
-      <input type="text" id="roll" placeholder="Roll Number" required>
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="text" id="phone" placeholder="Phone" required>
-      <input type="text" id="course" placeholder="Course" required>
-      <button type="submit">Save Student</button>
-    </form>
+<h2>Add / Update Student</h2>
 
-    <h2>Import Students</h2>
-    <input type="file" id="importFile" accept=".xlsx" />
-    <button id="importBtn">Import</button>
+<form id="studentForm" enctype="multipart/form-data">
 
-    <h2>Students List</h2>
+<input type="hidden" id="studentId">
 
-    <!-- Export Buttons -->
-    <button id="exportExcelBtn" style="margin-bottom:10px;">Export to Excel</button>
-    <button id="exportPdfBtn" style="margin-bottom:10px;">Export to PDF</button>
+<input type="text" id="name" placeholder="Student Name" required>
+<input type="text" id="roll" placeholder="Roll Number" required>
+<input type="email" id="email" placeholder="Email" required>
+<input type="text" id="phone" placeholder="Phone" required>
+<input type="text" id="course" placeholder="Course" required>
 
-    <div style="margin: 10px 0;">
-      <input type="text" id="search" placeholder="Search student..." />
-      <button id="resetSearch">Reset</button>
-    </div>
+<input type="file" id="profile_pic" accept="image/*">
 
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll"></th>
-          <th data-key="id">ID</th>
-          <th data-key="name">Name</th>
-          <th data-key="roll">Roll</th>
-          <th data-key="email">Email</th>
-          <th data-key="phone">Phone</th>
-          <th data-key="course">Course</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="studentTable"></tbody>
-    </table>
+<button type="submit">Save Student</button>
 
-    <!-- Bulk Delete -->
-    <button id="deleteSelectedBtn" style="margin-top:10px;">Delete Selected</button>
+</form>
 
-    <!-- Pagination -->
-    <div id="pagination"></div>
+<h2>Import Students</h2>
 
-  </div>
+<input type="file" id="importFile" accept=".xlsx"/>
+<button id="importBtn">Import</button>
+
+<h2>Students List</h2>
+
+<button id="exportExcelBtn">Export to Excel</button>
+<button id="exportPdfBtn">Export to PDF</button>
+
+<div style="margin:10px 0">
+<input type="text" id="search" placeholder="Search student..."/>
+<button id="resetSearch">Reset</button>
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th><input type="checkbox" id="selectAll"></th>
+<th data-key="id">ID</th>
+<th>Photo</th>
+<th data-key="name">Name</th>
+<th data-key="roll">Roll</th>
+<th data-key="email">Email</th>
+<th data-key="phone">Phone</th>
+<th data-key="course">Course</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+<button id="deleteSelectedBtn">Delete Selected</button>
+
+<div id="pagination"></div>
 
 </div>
+</div>
+
+
+<!-- STUDENT VIEW MODAL -->
+
+<div id="studentModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close-btn" onclick="closeModal()">&times;</span>
+
+<img id="modalPhoto" class="modal-photo">
+
+<h2 id="modalName"></h2>
+
+<p><strong>Roll:</strong> <span id="modalRoll"></span></p>
+<p><strong>Email:</strong> <span id="modalEmail"></span></p>
+<p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+<p><strong>Course:</strong> <span id="modalCourse"></span></p>
+
+</div>
+
+</div>
+
 
 <script src="js/main.js"></script>
 
 <script>
-  // Export Excel
-  document.getElementById("exportExcelBtn").addEventListener("click", () => {
-    window.location.href = "/api/students/export";
-  });
 
-  // Export PDF
-  document.getElementById("exportPdfBtn").addEventListener("click", () => {
-    window.location.href = "/api/students/export-pdf";
-  });
+document.getElementById("exportExcelBtn").addEventListener("click",()=>{
+window.location.href="/api/students/export";
+});
+
+document.getElementById("exportPdfBtn").addEventListener("click",()=>{
+window.location.href="/api/students/export-pdf";
+});
+
 </script>
 
 </body>
