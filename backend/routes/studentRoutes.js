@@ -4,7 +4,9 @@ const db = require("../config/db");
 const ExcelJS = require("exceljs"); // For Excel export
 const PDFDocument = require("pdfkit"); // For PDF export
 
+/* ------------------------ */
 /* GET STUDENTS WITH PAGINATION */
+/* ------------------------ */
 router.get("/students", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
@@ -18,7 +20,9 @@ router.get("/students", (req, res) => {
   });
 });
 
+/* ------------------------ */
 /* GET TOTAL STUDENTS COUNT */
+/* ------------------------ */
 router.get("/students/count", (req, res) => {
   db.query("SELECT COUNT(*) as total FROM students", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -26,7 +30,9 @@ router.get("/students/count", (req, res) => {
   });
 });
 
+/* ------------------------ */
 /* ADD STUDENT */
+/* ------------------------ */
 router.post("/students", (req, res) => {
   const { name, roll, email, phone, course } = req.body;
   const sql =
@@ -37,7 +43,9 @@ router.post("/students", (req, res) => {
   });
 });
 
-/* DELETE STUDENT */
+/* ------------------------ */
+/* DELETE SINGLE STUDENT */
+/* ------------------------ */
 router.delete("/students/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM students WHERE id=?";
@@ -47,7 +55,9 @@ router.delete("/students/:id", (req, res) => {
   });
 });
 
+/* ------------------------ */
 /* UPDATE STUDENT */
+/* ------------------------ */
 router.put("/students/:id", (req, res) => {
   const { id } = req.params;
   const { name, roll, email, phone, course } = req.body;
@@ -62,7 +72,9 @@ router.put("/students/:id", (req, res) => {
   });
 });
 
+/* ------------------------ */
 /* DASHBOARD STATS */
+/* ------------------------ */
 router.get("/stats", (req, res) => {
   db.query("SELECT COUNT(*) as total FROM students", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -155,6 +167,24 @@ router.get("/students/export-pdf", (req, res) => {
     });
 
     doc.end();
+  });
+});
+
+/* ------------------------ */
+/* BULK DELETE STUDENTS */
+/* ------------------------ */
+router.post("/students/bulk-delete", (req, res) => {
+  const { ids } = req.body; // array of student ids
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: "No student IDs provided" });
+  }
+
+  const placeholders = ids.map(() => "?").join(",");
+  const sql = `DELETE FROM students WHERE id IN (${placeholders})`;
+
+  db.query(sql, ids, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: `${result.affectedRows} students deleted` });
   });
 });
 

@@ -50,15 +50,17 @@
 
     <h2>Students List</h2>
 
-    <!-- Export Buttons -->
+    <!-- Export & Bulk Delete Buttons -->
     <button id="exportExcelBtn" style="margin-bottom:10px;">Export to Excel</button>
     <button id="exportPdfBtn" style="margin-bottom:10px;">Export to PDF</button>
+    <button id="deleteSelectedBtn" style="margin-bottom:10px; background:red; color:white;">Delete Selected</button>
 
     <input type="text" id="search" placeholder="Search student..." />
 
     <table>
       <thead>
         <tr>
+          <th><input type="checkbox" id="selectAll"></th>
           <th>ID</th>
           <th>Name</th>
           <th>Roll</th>
