@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ClassNova Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="sidebar">
+<h2>ClassNova</h2>
+
+<ul>
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="students.html">Students</a></li>
+<li><a href="courses.html">Courses</a></li>
+<li><a href="teachers.html">Teachers</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="#" onclick="logout()">Logout</a></li>
+</ul>
+</div>
+
+<div class="main">
+
+<h1>Dashboard</h1>
+
+<div class="stats">
+
+<div class="card">
+<h3>Total Students</h3>
+<p id="totalStudents">0</p>
+</div>
+
+<div class="card">
+<h3>Student Growth</h3>
+<canvas id="growthChart"></canvas>
+</div>
+
+</div>
+
+<div class="chart-card">
+<h3>Students per Course</h3>
+<canvas id="courseChart"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<script src="js/main.js"></script>
+
+<script>
+function logout(){
+alert("Logged out");
+window.location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>

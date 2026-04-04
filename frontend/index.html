@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -51,9 +52,50 @@ border-radius:50%;
 object-fit:cover;
 }
 
+/* SMALL KPI CARD */
+
+.stats{
+display:flex;
+gap:20px;
+margin-bottom:20px;
+}
+
+.small-card{
+width:200px;
+height:120px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:white;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.small-card h3{
+margin:0;
+font-size:16px;
+}
+
+.small-card p{
+font-size:32px;
+font-weight:bold;
+color:#2ecc71;
+margin-top:10px;
+}
+
+/* CHART GRID */
+
+.chart-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-bottom:20px;
+}
+
 /* CHART CARD */
+
 .chart-card{
-margin-top:20px;
 background:white;
 padding:20px;
 border-radius:10px;
@@ -63,6 +105,7 @@ box-shadow:0 2px 5px rgba(0,0,0,0.1);
 .chart-card canvas{
 max-height:300px;
 }
+
 </style>
 </head>
 
@@ -73,12 +116,12 @@ max-height:300px;
 <div class="sidebar">
 <h2>ClassNova</h2>
 <ul>
-<li>Dashboard</li>
-<li>Students</li>
-<li>Courses</li>
-<li>Teachers</li>
-<li>Settings</li>
-<li>Logout</li>
+<li><a href="index.html">Dashboard</a></li>
+<li><a href="students.html">Students</a></li>
+<li><a href="courses.html">Courses</a></li>
+<li><a href="teachers.html">Teachers</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="#" onclick="logout()">Logout</a></li>
 </ul>
 </div>
 
@@ -86,17 +129,31 @@ max-height:300px;
 
 <h1>Student Management</h1>
 
+<!-- SMALL TOTAL STUDENT CARD -->
+
 <div class="stats">
-<div class="card">
+
+<div class="small-card">
 <h3>Total Students</h3>
 <p id="totalStudents">0</p>
 </div>
+
 </div>
 
-<!-- COURSE CHART -->
+<!-- CHART SECTION -->
+
+<div class="chart-grid">
+
 <div class="chart-card">
 <h3>Students per Course</h3>
 <canvas id="courseChart"></canvas>
+</div>
+
+<div class="chart-card">
+<h3>Student Growth</h3>
+<canvas id="growthChart"></canvas>
+</div>
+
 </div>
 
 <h2>Add / Update Student</h2>
@@ -187,6 +244,7 @@ max-height:300px;
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
 document.getElementById("exportExcelBtn").addEventListener("click",()=>{
 window.location.href="/api/students/export";
 });
@@ -194,6 +252,14 @@ window.location.href="/api/students/export";
 document.getElementById("exportPdfBtn").addEventListener("click",()=>{
 window.location.href="/api/students/export-pdf";
 });
+
+</script>
+
+<script>
+function logout(){
+alert("Logged out");
+window.location.href="index.html";
+}
 </script>
 
 </body>

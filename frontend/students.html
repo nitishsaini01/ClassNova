@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Students</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="sidebar">
+<h2>ClassNova</h2>
+
+<ul>
+<li><a href="dashboard.html">Dashboard</a></li>
+<li><a href="students.html">Students</a></li>
+<li><a href="courses.html">Courses</a></li>
+<li><a href="teachers.html">Teachers</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="#" onclick="logout()">Logout</a></li>
+</ul>
+</div>
+
+<div class="main">
+
+<h1>Students</h1>
+
+<h2>Add Student</h2>
+
+<form id="studentForm" enctype="multipart/form-data">
+
+<input type="hidden" id="studentId">
+
+<input type="text" id="name" placeholder="Student Name" required>
+<input type="text" id="roll" placeholder="Roll Number" required>
+<input type="email" id="email" placeholder="Email" required>
+<input type="text" id="phone" placeholder="Phone" required>
+<input type="text" id="course" placeholder="Course" required>
+
+<input type="file" id="profile_pic" accept="image/*">
+
+<button type="submit">Save Student</button>
+
+</form>
+
+<h2>Students List</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Roll</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Course</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="studentTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script src="js/main.js"></script>
+
+<script>
+function logout(){
+alert("Logged out");
+window.location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>

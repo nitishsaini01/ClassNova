@@ -225,4 +225,49 @@ res.json(result);
 
 });
 
+
+/* -------------------- STUDENTS PER COURSE -------------------- */
+
+router.get("/stats/courses", auth, (req,res)=>{
+
+const sql = `
+SELECT course, COUNT(*) as count
+FROM students
+GROUP BY course
+`;
+
+db.query(sql,(err,result)=>{
+
+if(err) return res.status(500).json(err);
+
+res.json(result);
+
+});
+
+});
+
+
+/* -------------------- STUDENT GROWTH -------------------- */
+
+router.get("/stats/growth", auth, (req,res)=>{
+
+const sql = `
+SELECT DATE_FORMAT(created_at,'%Y-%m') as month,
+COUNT(*) as count
+FROM students
+GROUP BY month
+ORDER BY month
+`;
+
+db.query(sql,(err,result)=>{
+
+if(err) return res.status(500).json(err);
+
+res.json(result);
+
+});
+
+});
+
+
 module.exports = router;

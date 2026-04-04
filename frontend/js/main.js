@@ -1,5 +1,11 @@
 console.log("JS Loaded");
 
+document.addEventListener("DOMContentLoaded", () => {
+
+if(!document.getElementById("studentTable")){
+    return;
+}
+
 const form = document.getElementById("studentForm");
 const table = document.getElementById("studentTable");
 const searchInput = document.getElementById("search");
@@ -30,6 +36,7 @@ async function loadStudents(page = 1){
 /* DISPLAY STUDENTS */
 function displayStudents(data){
   table.innerHTML = "";
+
   data.forEach(student => {
     table.innerHTML += `
       <tr>
@@ -37,7 +44,7 @@ function displayStudents(data){
         <td>${student.id}</td>
 
         <td>
-          <img src="${student.profile_pic ? '/' + student.profile_pic.replace(/\\\\/g,'/') : 'uploads/default.png'}" 
+          <img src="${student.profile_pic ? '/' + student.profile_pic.replace(/\\\\/g,'/') : 'uploads/default.png'}"
                class="profile-pic">
         </td>
 
@@ -179,13 +186,9 @@ form.addEventListener("submit", async (e)=>{
   const student = {
 
     name: document.getElementById("name").value,
-
     roll: document.getElementById("roll").value,
-
     email: document.getElementById("email").value,
-
     phone: document.getElementById("phone").value,
-
     course: document.getElementById("course").value
 
   };
@@ -195,13 +198,9 @@ form.addEventListener("submit", async (e)=>{
   if(id){
 
     await fetch(`/api/students/${id}`,{
-
       method:"PUT",
-
       headers:{"Content-Type":"application/json"},
-
       body: JSON.stringify(student)
-
     });
 
   }
@@ -209,13 +208,9 @@ form.addEventListener("submit", async (e)=>{
   else{
 
     const res = await fetch("/api/students",{
-
       method:"POST",
-
       headers:{"Content-Type":"application/json"},
-
       body: JSON.stringify(student)
-
     });
 
     const data = await res.json();
@@ -231,11 +226,8 @@ form.addEventListener("submit", async (e)=>{
     formData.append("profile_pic", profilePicFile);
 
     await fetch(`/api/students/${studentId}/upload`, {
-
       method: "POST",
-
       body: formData
-
     });
 
   }
@@ -254,15 +246,10 @@ form.addEventListener("submit", async (e)=>{
 function editStudent(id,name,roll,email,phone,course){
 
   document.getElementById("studentId").value = id;
-
   document.getElementById("name").value = name;
-
   document.getElementById("roll").value = roll;
-
   document.getElementById("email").value = email;
-
   document.getElementById("phone").value = phone;
-
   document.getElementById("course").value = course;
 
   window.scrollTo({top:0,behavior:"smooth"});
@@ -290,29 +277,20 @@ async function deleteStudent(id){
 deleteSelectedBtn.addEventListener("click", async () => {
 
   const selected = Array.from(document.querySelectorAll(".selectStudent"))
-
                         .filter(cb => cb.checked)
-
                         .map(cb => cb.dataset.id);
 
   if(selected.length === 0){
-
     alert("Select at least one student.");
-
     return;
-
   }
 
   if(!confirm(`Delete ${selected.length} students?`)) return;
 
   await fetch("/api/students/bulk-delete", {
-
     method:"POST",
-
     headers:{"Content-Type":"application/json"},
-
     body: JSON.stringify({ids: selected})
-
   });
 
   loadStudents(currentPage);
@@ -325,11 +303,8 @@ deleteSelectedBtn.addEventListener("click", async () => {
 searchInput.addEventListener("input", ()=>filterStudents());
 
 resetSearch.addEventListener("click", ()=>{
-
   searchInput.value = "";
-
   filterStudents();
-
 });
 
 function filterStudents(){
@@ -339,13 +314,9 @@ function filterStudents(){
   const filtered = students.filter(s =>
 
     s.name.toLowerCase().includes(keyword) ||
-
     s.roll.toLowerCase().includes(keyword) ||
-
     s.email.toLowerCase().includes(keyword) ||
-
     s.phone.toLowerCase().includes(keyword) ||
-
     s.course.toLowerCase().includes(keyword)
 
   );
@@ -360,23 +331,16 @@ function filterStudents(){
 importBtn.addEventListener("click", async ()=>{
 
   if(importFile.files.length === 0){
-
     alert("Select an Excel file.");
-
     return;
-
   }
 
   const formData = new FormData();
-
   formData.append("file", importFile.files[0]);
 
   const res = await fetch("/api/students/import", {
-
     method:"POST",
-
     body: formData
-
   });
 
   const data = await res.json();
@@ -394,13 +358,13 @@ importBtn.addEventListener("click", async ()=>{
 
 async function loadStats(){
 
-  const res = await fetch("/api/stats");
+const res = await fetch("/api/stats");
+const data = await res.json();
 
-  const data = await res.json();
+document.getElementById("totalStudents").innerText = data.students;
 
-  document.getElementById("totalStudents").innerText = data.students;
-
-  loadCourseChart();
+loadCourseChart();
+loadGrowthChart();
 
 }
 
@@ -423,9 +387,7 @@ document.getElementById("studentModal").style.display="block";
 }
 
 function closeModal(){
-
 document.getElementById("studentModal").style.display="none";
-
 }
 
 /* ------------------------ */
@@ -439,11 +401,9 @@ loadStudents();
 async function loadCourseChart(){
 
 const res = await fetch("/api/stats/courses");
-
 const data = await res.json();
 
 const labels = data.map(d => d.course);
-
 const values = data.map(d => d.count);
 
 const ctx = document.getElementById("courseChart");
@@ -451,15 +411,55 @@ const ctx = document.getElementById("courseChart");
 if(!ctx) return;
 
 new Chart(ctx,{
-type:"bar",
+type:"pie",
 data:{
 labels:labels,
 datasets:[{
 label:"Students",
 data:values,
-backgroundColor:"#2ecc71"
+backgroundColor:[
+"#3498db",
+"#2ecc71",
+"#f1c40f",
+"#e74c3c",
+"#9b59b6",
+"#1abc9c"
+]
 }]
 }
 });
 
 }
+
+/* ------------------------ */
+/* STUDENT GROWTH CHART */
+
+async function loadGrowthChart(){
+
+const res = await fetch("/api/stats/growth");
+const data = await res.json();
+
+const labels = data.map(d => d.month);
+const values = data.map(d => d.count);
+
+const ctx = document.getElementById("growthChart");
+
+if(!ctx) return;
+
+new Chart(ctx,{
+type:"line",
+data:{
+labels:labels,
+datasets:[{
+label:"New Students",
+data:values,
+borderColor:"#3498db",
+fill:false
+}]
+}
+});
+
+}
+
+/* THIS LINE CLOSES DOMContentLoaded */
+});
