@@ -1,22 +1,34 @@
 const express = require("express");
 const router = express.Router();
+const mysql = require("mysql2/promise");
 
-// Simple hardcoded admin login
-const ADMIN = {
-  username: "admin",
-  password: "1234"
-};
+// MySQL connection pool
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "mysqlnitish01", // your MySQL password
+  database: "classnova"
+});
 
-router.post("/login", (req, res) => {
-
+// Login route (plain text)
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  if(username === ADMIN.username && password === ADMIN.password){
-    return res.json({ success: true });
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM users WHERE username = ? AND password = ?",
+      [username, password]
+    );
+
+    if (rows.length > 0) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Server error" });
   }
-
-  res.json({ success: false, message: "Invalid login" });
-
 });
 
 module.exports = router;

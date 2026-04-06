@@ -17,7 +17,7 @@ const data = await res.json();
 
 if(data.success){
 
-sessionStorage.setItem("loggedIn","true");
+localStorage.setItem("loggedIn","true");
 
 window.location.href="/";
 

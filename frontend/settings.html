@@ -8,7 +8,7 @@
 <body>
 
   <script>
-  if (!sessionStorage.getItem("loggedIn")) {
+  if (!localStorage.getItem("loggedIn")) {
     // If the user is not logged in, redirect to login page
     window.location.href = "login.html";
   }

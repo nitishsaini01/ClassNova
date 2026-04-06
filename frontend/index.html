@@ -9,10 +9,9 @@
 <body>
 
   <script>
-  if (!sessionStorage.getItem("loggedIn")) {
-    // If the user is not logged in, redirect to login page
-    window.location.href = "login.html";
-  }
+if (!localStorage.getItem("loggedIn")) {
+  window.location.href = "login.html";
+}
 </script>
 
 <div id="sidebarContainer"></div>
