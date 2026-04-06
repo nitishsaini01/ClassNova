@@ -7,24 +7,122 @@
 </head>
 <body>
 
-  <script>
-  if (!localStorage.getItem("loggedIn")) {
-    // If the user is not logged in, redirect to login page
-    window.location.href = "login.html";
-  }
+<script>
+if (!localStorage.getItem("loggedIn")) {
+  window.location.href = "login.html";
+}
 </script>
 
 <div id="sidebarContainer"></div>
 
 <div class="main">
+
 <h1>Course Management</h1>
-<p>Course system will be added here.</p>
+
+<h3>Add Course</h3>
+
+<form id="courseForm">
+
+<input type="text" id="courseName" placeholder="Course Name" required>
+
+<input type="text" id="courseCode" placeholder="Course Code" required>
+
+<input type="text" id="courseDuration" placeholder="Duration (Example: 3 Months)" required>
+
+<button type="submit">Add Course</button>
+
+</form>
+
+<br>
+
+<h3>Course List</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Course Name</th>
+<th>Course Code</th>
+<th>Duration</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="courseTable"></tbody>
+
+</table>
+
 </div>
+
+
+<script>
+
+let courses = JSON.parse(localStorage.getItem("courses")) || [];
+
+function renderCourses(){
+
+const table = document.getElementById("courseTable");
+table.innerHTML = "";
+
+courses.forEach((course,index)=>{
+
+table.innerHTML += `
+<tr>
+<td>${index+1}</td>
+<td>${course.name}</td>
+<td>${course.code}</td>
+<td>${course.duration}</td>
+<td>
+<button onclick="deleteCourse(${index})">Delete</button>
+</td>
+</tr>
+`;
+
+});
+
+}
+
+document.getElementById("courseForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const name = document.getElementById("courseName").value;
+const code = document.getElementById("courseCode").value;
+const duration = document.getElementById("courseDuration").value;
+
+courses.push({name,code,duration});
+
+localStorage.setItem("courses",JSON.stringify(courses));
+
+renderCourses();
+
+this.reset();
+
+});
+
+function deleteCourse(index){
+
+courses.splice(index,1);
+
+localStorage.setItem("courses",JSON.stringify(courses));
+
+renderCourses();
+
+}
+
+renderCourses();
+
+</script>
+
 
 <script>
 fetch("sidebar.html")
   .then(response => response.text())
-  .then(data => { document.getElementById("sidebarContainer").innerHTML = data; });
+  .then(data => {
+    document.getElementById("sidebarContainer").innerHTML = data;
+  });
 </script>
+
 </body>
 </html>

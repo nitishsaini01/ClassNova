@@ -7,24 +7,158 @@
 </head>
 <body>
 
-  <script>
-  if (!localStorage.getItem("loggedIn")) {
-    // If the user is not logged in, redirect to login page
-    window.location.href = "login.html";
-  }
+<script>
+if (!localStorage.getItem("loggedIn")) {
+  window.location.href = "login.html";
+}
 </script>
 
 <div id="sidebarContainer"></div>
 
 <div class="main">
+
 <h1>Settings</h1>
-<p>System settings coming soon.</p>
+
+<!-- ADMIN PROFILE -->
+<h2>Admin Profile</h2>
+
+<form id="profileForm">
+
+<input type="text" id="adminName" placeholder="Admin Name">
+
+<input type="email" id="adminEmail" placeholder="Admin Email">
+
+<button type="submit">Update Profile</button>
+
+</form>
+
+<br>
+
+<!-- CHANGE PASSWORD -->
+
+<h2>Change Password</h2>
+
+<form id="passwordForm">
+
+<input type="password" id="currentPassword" placeholder="Current Password">
+
+<input type="password" id="newPassword" placeholder="New Password">
+
+<button type="submit">Change Password</button>
+
+</form>
+
+<br>
+
+<!-- THEME SETTINGS -->
+
+<h2>Appearance</h2>
+
+<button onclick="setTheme('light')">Light Mode</button>
+
+<button onclick="setTheme('dark')">Dark Mode</button>
+
+<br><br>
+
+<!-- SYSTEM INFO -->
+
+<h2>System Information</h2>
+
+<p><b>ERP Name:</b> ClassNova</p>
+
+<p><b>Version:</b> 1.0</p>
+
+<p><b>Developer:</b> Your Name</p>
+
 </div>
+
+
+<script>
+
+/* LOAD SAVED PROFILE */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+const name = localStorage.getItem("adminName");
+const email = localStorage.getItem("adminEmail");
+
+if(name){
+document.getElementById("adminName").value = name;
+}
+
+if(email){
+document.getElementById("adminEmail").value = email;
+}
+
+});
+
+/* UPDATE PROFILE */
+
+document.getElementById("profileForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const name = document.getElementById("adminName").value;
+const email = document.getElementById("adminEmail").value;
+
+localStorage.setItem("adminName", name);
+localStorage.setItem("adminEmail", email);
+
+alert("Profile Updated Successfully");
+
+});
+
+/* CHANGE PASSWORD */
+
+document.getElementById("passwordForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const newPass = document.getElementById("newPassword").value;
+
+localStorage.setItem("adminPassword", newPass);
+
+alert("Password Changed Successfully");
+
+});
+
+/* THEME CHANGE */
+
+function setTheme(mode){
+
+if(mode === "dark"){
+document.body.style.background = "#1e1e1e";
+document.body.style.color = "white";
+localStorage.setItem("theme","dark");
+}
+
+if(mode === "light"){
+document.body.style.background = "white";
+document.body.style.color = "black";
+localStorage.setItem("theme","light");
+}
+
+}
+
+/* LOAD SAVED THEME */
+
+const savedTheme = localStorage.getItem("theme");
+
+if(savedTheme === "dark"){
+document.body.style.background = "#1e1e1e";
+document.body.style.color = "white";
+}
+
+</script>
+
 
 <script>
 fetch("sidebar.html")
-  .then(response => response.text())
-  .then(data => { document.getElementById("sidebarContainer").innerHTML = data; });
+.then(response => response.text())
+.then(data => {
+document.getElementById("sidebarContainer").innerHTML = data;
+});
 </script>
+
 </body>
 </html>

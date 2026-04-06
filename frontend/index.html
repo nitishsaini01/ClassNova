@@ -6,9 +6,10 @@
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
-  <script>
+<script>
 if (!localStorage.getItem("loggedIn")) {
   window.location.href = "login.html";
 }
@@ -17,6 +18,7 @@ if (!localStorage.getItem("loggedIn")) {
 <div id="sidebarContainer"></div>
 
 <div class="main">
+
 <h1>Student Management</h1>
 
 <div class="stats">
@@ -31,6 +33,7 @@ if (!localStorage.getItem("loggedIn")) {
     <h3>Students per Course</h3>
     <canvas id="courseChart"></canvas>
   </div>
+
   <div class="chart-card">
     <h3>Student Growth</h3>
     <canvas id="growthChart"></canvas>
@@ -38,58 +41,103 @@ if (!localStorage.getItem("loggedIn")) {
 </div>
 
 <h2>Add / Update Student</h2>
+
 <form id="studentForm" enctype="multipart/form-data">
+
 <input type="hidden" id="studentId">
+
 <input type="text" id="name" placeholder="Student Name" required>
+
 <input type="text" id="roll" placeholder="Roll Number" required>
+
 <input type="email" id="email" placeholder="Email" required>
+
 <input type="text" id="phone" placeholder="Phone" required>
+
 <input type="text" id="course" placeholder="Course" required>
+
 <input type="file" id="profile_pic" accept="image/*">
+
 <button type="submit">Save Student</button>
+
 </form>
 
 <h2>Import Students</h2>
+
 <input type="file" id="importFile" accept=".xlsx"/>
+
 <button id="importBtn">Import</button>
 
 <h2>Students List</h2>
+
 <button id="exportExcelBtn">Export to Excel</button>
+
 <button id="exportPdfBtn">Export to PDF</button>
 
 <div style="margin:10px 0">
+
 <input type="text" id="search" placeholder="Search student..."/>
+
 <button id="resetSearch">Reset</button>
+
 </div>
 
 <table>
+
 <thead>
+
 <tr>
+
 <th><input type="checkbox" id="selectAll"></th>
+
 <th data-key="id">ID</th>
+
 <th>Photo</th>
+
 <th data-key="name">Name</th>
+
 <th data-key="roll">Roll</th>
+
 <th data-key="email">Email</th>
+
 <th data-key="phone">Phone</th>
+
 <th data-key="course">Course</th>
+
 <th>Action</th>
+
 </tr>
+
 </thead>
-<tbody id="studentTable"></tbody>
+
+<tbody id="studentTableBody"></tbody>
+
 </table>
 
 <button id="deleteSelectedBtn">Delete Selected</button>
+
 <div id="pagination"></div>
+
 </div>
 
 <script src="js/main.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
 fetch("sidebar.html")
-  .then(response => response.text())
-  .then(data => { document.getElementById("sidebarContainer").innerHTML = data; });
+
+.then(response => response.text())
+
+.then(data => {
+
+document.getElementById("sidebarContainer").innerHTML = data;
+
+});
+
 </script>
+
 </body>
+
 </html>

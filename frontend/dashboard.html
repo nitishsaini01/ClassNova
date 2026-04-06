@@ -3,49 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <title>ClassNova Dashboard</title>
+
 <link rel="stylesheet" href="css/style.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 <body>
 
-  <script>
-  if (!localStorage.getItem("loggedIn")) {
-    // If the user is not logged in, redirect to login page
-    window.location.href = "login.html";
-  }
+<script>
+if (!localStorage.getItem("loggedIn")) {
+  window.location.href = "login.html";
+}
 </script>
 
 <div id="sidebarContainer"></div>
 
 <div class="main">
+
 <h1>Dashboard</h1>
 
 <div class="stats">
-  <div class="small-card">
-    <h3>Total Students</h3>
-    <p id="totalStudents">0</p>
-  </div>
+
+<div class="small-card">
+
+<h3>Total Students</h3>
+
+<p id="totalStudents">0</p>
+
+</div>
+
 </div>
 
 <div class="chart-grid">
-  <div class="chart-card">
-    <h3>Students per Course</h3>
-    <canvas id="courseChart"></canvas>
-  </div>
-  <div class="chart-card">
-    <h3>Student Growth</h3>
-    <canvas id="growthChart"></canvas>
-  </div>
+
+<div class="chart-card">
+
+<h3>Students per Course</h3>
+
+<canvas id="courseChart"></canvas>
+
 </div>
+
+<div class="chart-card">
+
+<h3>Student Growth</h3>
+
+<canvas id="growthChart"></canvas>
+
+</div>
+
+</div>
+
 </div>
 
 <script src="js/main.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
 fetch("sidebar.html")
-  .then(response => response.text())
-  .then(data => { document.getElementById("sidebarContainer").innerHTML = data; });
+
+.then(response => response.text())
+
+.then(data => {
+
+document.getElementById("sidebarContainer").innerHTML = data;
+
+});
+
 </script>
+
 </body>
 </html>
